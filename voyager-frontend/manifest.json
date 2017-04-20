@@ -1,0 +1,6 @@
+{
+  "name": "voyager-frontend",
+  "short_name": "voyager-frontend",
+  "start_url": "/",
+  "display": "standalone"
+}

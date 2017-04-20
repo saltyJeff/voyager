@@ -1,0 +1,89 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/funk/funk.html">
+<link rel="import" href="../../bower_components/app-layout/app-layout.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="./flux/actions.html">
+<link rel="import" href="./flux/store.html">
+<link rel="import" href="./voyager-sidepanel.html">
+<link rel="import" href="./voyager-view.html">
+<link rel="import" href="./voyager-path.html">
+<dom-module id="voyager-frontend-app">
+	<template>
+		<style>
+			:host {
+				display: flex;
+				flex-direction: column;
+				height: 100vh;
+				width: 100vw;
+				overflow-x: hidden;
+				overflow-y: hidden;
+				margin: 0px;
+			}
+			app-toolbar {
+        		background-color: #1E88E5;
+        		color: white;
+        		font-size: 24px;
+      		}
+			#main {
+				display: flex;
+				flex: 1;
+				flex-direction: row;
+			}
+			voyager-sidepanel {
+				align-self: stretch;
+			}
+			voyager-view {
+				flex: 1;
+				overflow-y: scroll;
+			}
+		</style>
+		<app-header-layout>
+			<app-header>
+				<app-toolbar>
+					<paper-icon-button icon="menu" drawer-toggle on-click="togglePanel"></paper-icon-button>
+    				<div main-title>Voyager</div>
+  				</app-toolbar>
+				<app-toolbar>
+					<voyager-path></voyager-path>
+  				</app-toolbar>
+			</app-header>
+		</app-header-layout>
+		<div id="main">
+			<voyager-sidepanel style$="[[computeToggle(state.appStore.panelOut)]]"></voyager-sidepanel>
+			<voyager-view></voyager-view>
+		</div>
+		<app-store></app-store>
+	</template>
+
+	<script>
+		Polymer({
+			is: 'voyager-frontend-app',
+			behaviors: [
+				Funk.ViewBehavior
+			],
+			properties: {
+				startDir: {
+					type: String,
+					notify: true
+				}
+			},
+			togglePanel: function () {
+				actions.togglePanel();
+			},
+			computeToggle: function(panelOut) {
+				return 'display: '+(panelOut ? 'block': 'none');
+			}
+		});
+	</script>
+	<script>
+		window.ipcRenderer = require('electron').ipcRenderer;
+		window.path = require('path');
+		ipcRenderer.send('voyagerOpen');
+		console.log('sent first msg');
+		ipcRenderer.on('pluginInfo', function (event, pluginName, plugin, tlds) {
+			console.log('registering: '+pluginName);
+			actions.registerPlugin(pluginName, plugin.pluginName, tlds);
+		});
+	</script>
+</dom-module>

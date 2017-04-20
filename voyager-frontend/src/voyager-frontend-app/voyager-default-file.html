@@ -1,0 +1,59 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-icons/editor-icons.html">
+<link rel="import" href="../../bower_components/funk/funk.html">
+<link rel="import" href="./flux/actions.html">
+<dom-module id="voyager-default-file">
+	<template>
+		<style is="custom-style">
+			:host {
+				display: block;
+				background-color: lightsteelblue;
+				width: 55ch;
+				height: 40px;
+				overflow: hidden;
+				padding: 2px;
+			}
+			paper-button.file-button {
+				display: inline-block;
+				background-color: white;
+				width: calc(55ch - 80px);
+			}
+			iron-icon.file-icon {
+				display: inline-block;
+				--iron-icon-width: 30px;
+				--iron-icon-height: 30px;
+			}
+		</style>
+		<iron-icon class="file-icon" icon="editor:insert-drive-file"></iron-icon>
+		<paper-button raised class="file-button" on-tap="openFile">[[substr(file, 0, 47)]]</paper-button>
+	</template>
+	<script>
+		Polymer({
+			is: 'voyager-default-file',
+			behaviors: [
+				Funk.ViewBehavior
+			],
+			properties: {
+				file: {
+					type: String,
+					value: '',
+					notify: true
+				}
+			},
+			openFile: function(evt) {
+				var plug = this.state.appStore.plugins[this.state.appStore.currentPath.plugin];
+				var joined = this.state.appStore.currentPath.crumbs.join(path.sep);
+				ipcRenderer.send('voyagerPluginFile', plug.id, path.resolve(joined, this.file));
+			},
+			substr: function(str, start, count) {
+				var tmp = str.substr(start, count);
+				if(str.length > count) {
+					tmp += '...';
+				}
+				return tmp;
+			}
+		});
+	</script>
+</dom-module>

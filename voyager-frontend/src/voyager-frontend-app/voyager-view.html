@@ -1,0 +1,107 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/funk/funk.html">
+<link rel="import" href="./voyager-default-tld.html">
+<link rel="import" href="./voyager-default-file.html">
+<link rel="import" href="./voyager-default-dir.html">
+<dom-module id="voyager-view">
+	<template>
+		<style>
+			:host {
+				display: flex;
+				flex-wrap: wrap;
+				align-items: flex-start;
+				align-content: flex-start;
+				overflow-x: hidden;
+				overflow-y: auto;
+				padding: 5px;
+			}
+			hr {
+				width: 100%;
+				border-style: inset;
+			}
+		</style>
+		<template is="dom-repeat" items="[[tlds]]">
+        	<voyager-default-tld tld="[[item]]"></voyager-default-tld>
+    	</template>
+		<template is="dom-repeat" items="[[dirs]]">
+        	<voyager-default-dir dir="[[item]]"></voyager-default-dir>
+    	</template>
+		<hr>
+		<template is="dom-repeat" items="[[files]]">
+        	<voyager-default-file file="[[item]]"></voyager-default-file>
+    	</template>
+	</template>
+	<script>
+		Polymer({
+			is: 'voyager-view',
+			behaviors: [
+				Funk.ViewBehavior
+			],
+			properties: {
+				tlds: {
+					type: Array,
+					value: [],
+					notify: true
+				},
+				dirs: {
+					type: Array,
+					value: [],
+					notify: true
+				},
+				files: {
+					type: Array,
+					value: [],
+					notify: true
+				},
+			},
+			ready: function () {
+				ipcRenderer.on('pluginDir', this.handleIpc.bind(this));
+			},
+			observers: [
+				'switchView(state.appStore.currentPath.*, state.appStore.plugins.*)'
+			],
+			clr: function(arr) {
+				this.set(arr, []);
+			},
+			handleIpc: function(event, pluginName, dir, contents) {
+				var self = this;
+				self.clr('tlds');
+				self.clr('files');
+				self.clr('dirs');
+				if(contents.files) {
+					contents.files.forEach(function(val) {
+						self.push('files', val);
+					});
+				}
+				if(contents.dirs) {
+					contents.dirs.forEach(function(val) {
+						self.push('dirs', val);
+					})
+				}
+				//console.log(contents);
+			},
+			switchView: function(a, b) {
+				var self = this;
+				var currentPath = this.state.appStore.currentPath;
+				var plugins = this.state.appStore.plugins;
+				if(plugins.length == 0) {
+					self.clr('tlds');
+					self.clr('dirs');
+					self.clr('files');
+					console.log('not initialized');
+					return;
+				}
+				console.log('path:', currentPath);
+				if(currentPath.crumbs.length == 0) {
+					self.set('tlds', plugins[currentPath.plugin].tlds);
+					self.clr('dirs');
+					self.clr('files');
+					console.log('at a TLD');
+					return;
+				}
+				var joined = currentPath.crumbs.join(path.sep);
+				ipcRenderer.send('voyagerPluginDir', plugins[currentPath.plugin].id, joined);
+			}
+		});
+	</script>
+</dom-module>

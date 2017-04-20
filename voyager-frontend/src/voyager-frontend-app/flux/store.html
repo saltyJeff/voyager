@@ -1,0 +1,55 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/funk/funk.html">
+<link rel="import" href="./actions.html">
+
+<script>
+	Polymer({
+		is: 'app-store',
+		behaviors: [
+			Funk.StoreBehavior
+		],
+		properties: {
+			storeName: {
+				type: String,
+				value: 'appStore'
+			},
+			panelOut: {
+				type: Boolean,
+				value: true,
+				notify: true
+			},
+			plugins: {
+				type: Array,
+				value: [],
+				notify: true
+			},
+			currentPath: {
+				type: Object,
+				value: {
+					plugin: 0,
+					crumbs: []
+				},
+				notify: true
+			}
+		},
+		funkListenables: actions,
+		onRegisterPlugin: function(id, name, tlds) {
+			this.push('plugins', {id: id, name: name, tlds: tlds});
+		},
+		onTogglePanel: function() {
+			this.panelOut = !this.panelOut;
+		},
+		onSelectPlugin: function (i) {
+			this.set('currentPath', {
+				plugin: i,
+				crumbs: []
+			});
+		},
+		onAddPath: function(crumb) {
+			this.push('currentPath.crumbs', crumb);
+		},
+		onSetPath: function (crumbs) {
+			this.set('currentPath.crumbs', crumbs);
+		}
+	})
+</script>

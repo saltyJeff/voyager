@@ -1,0 +1,51 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-icons/device-icons.html">
+<link rel="import" href="../../bower_components/funk/funk.html">
+<link rel="import" href="./flux/actions.html">
+<dom-module id="voyager-default-tld">
+	<template>
+		<style is="custom-style">
+			:host {
+				display: block;
+				background-color: whitesmoke;
+				width: 250px;
+				height: 100px;
+				overflow: hidden;
+				padding: 2px;
+				margin: 2px;
+			}
+			paper-button.tld-button {
+				display: inline-block;
+				background-color: white;
+				width: 135px;
+			}
+			iron-icon.tld-icon {
+				display: inline-block;
+				--iron-icon-width: 70px;
+				--iron-icon-height: 70px;
+			}
+		</style>
+		<iron-icon class="tld-icon" icon="device:storage"></iron-icon>
+		<paper-button raised class="tld-button" on-tap="goDeeper">[[tld.mount]]</paper-button>
+	</template>
+	<script>
+		Polymer({
+			is: 'voyager-default-tld',
+			behaviors: [
+				Funk.ViewBehavior
+			],
+			properties: {
+				tld: {
+					type: Object,
+					value: null,
+					notify: true
+				}
+			},
+			goDeeper: function(event) {
+				actions.addPath(this.tld.mount);
+			}
+		});
+	</script>
+</dom-module>
